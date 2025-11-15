@@ -32,18 +32,21 @@ class ShiftController extends Controller
                 return $this->errorResponse('Tidak ada shift aktif pada jam ini. Shift 1: 09:00-15:00, Shift 2: 15:00-10:00 (hari berikutnya)', 400);
             }
 
-            // Tentukan waktu mulai shift
+            // Tentukan waktu mulai dan akhir shift
             if ($shiftNumber == 1) {
-                // Shift 1: mulai jam 09:00 hari ini
+                // Shift 1: mulai jam 09:00 hari ini, selesai jam 15:00 hari ini
                 $shiftStart = Carbon::createFromFormat('Y-m-d H:i:s', $currentDate . ' 09:00:00', 'Asia/Jakarta');
+                $shiftEnd = Carbon::createFromFormat('Y-m-d H:i:s', $currentDate . ' 15:00:00', 'Asia/Jakarta');
             } else {
-                // Shift 2: mulai jam 15:00
+                // Shift 2: mulai jam 15:00, selesai jam 10:00 hari berikutnya
                 if ($currentHour >= 15) {
                     // Jika jam >= 15:00, shift 2 mulai hari ini jam 15:00
                     $shiftStart = Carbon::createFromFormat('Y-m-d H:i:s', $currentDate . ' 15:00:00', 'Asia/Jakarta');
+                    $shiftEnd = Carbon::createFromFormat('Y-m-d H:i:s', $now->copy()->addDay()->format('Y-m-d') . ' 10:00:00', 'Asia/Jakarta');
                 } else {
-                    // Jika jam < 10:00, shift 2 mulai hari kemarin jam 15:00
+                    // Jika jam < 10:00, shift 2 mulai hari kemarin jam 15:00, selesai hari ini jam 10:00
                     $shiftStart = Carbon::createFromFormat('Y-m-d H:i:s', $now->copy()->subDay()->format('Y-m-d') . ' 15:00:00', 'Asia/Jakarta');
+                    $shiftEnd = Carbon::createFromFormat('Y-m-d H:i:s', $currentDate . ' 10:00:00', 'Asia/Jakarta');
                 }
             }
 

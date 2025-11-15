@@ -1,0 +1,1643 @@
+{
+    "info": {
+        "_postman_id": "nacshier-api-collection-2025",
+        "name": "NaCshier API Collection",
+        "description": "Complete API collection for NaCshier Cashier System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication",
+            "item": [
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.token) {",
+                                    "        pm.environment.set(\"token\", jsonData.token);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["login"]
+                        }
+                    }
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/logout",
+                            "host": ["{{base_url}}"],
+                            "path": ["logout"]
+                        }
+                    }
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/forgot-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["forgot-password"]
+                        }
+                    }
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"token\": \"reset_token_here\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/reset-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["reset-password"]
+                        }
+                    }
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_password\": \"oldpassword\",\n  \"new_password\": \"newpassword123\",\n  \"new_password_confirmation\": \"newpassword123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/change-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["change-password"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/user-profile",
+                            "host": ["{{base_url}}"],
+                            "path": ["user-profile"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Users (Admin Only)",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users?page=1&per_page=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["users"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/USR001",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "USR001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"kasir1\",\n  \"name\": \"Kasir Satu\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"level\": \"user\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users",
+                            "host": ["{{base_url}}"],
+                            "path": ["users"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Kasir Satu Updated\",\n  \"level\": \"kasir\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/USR001",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "USR001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/users/USR001",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "USR001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Reset User Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"password\": \"newpassword123\",\n  \"password_confirmation\": \"newpassword123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/USR001/reset-password",
+                            "host": ["{{base_url}}"],
+                            "path": ["users", "USR001", "reset-password"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Products",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products?page=1&per_page=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["products"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/PRD001",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "PRD001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Produk Baru",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "selling_price",
+                                    "value": "25000",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "capital_price",
+                                    "value": "20000",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "stock",
+                                    "value": "100",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "CAT001",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products",
+                            "host": ["{{base_url}}"],
+                            "path": ["products"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "_method",
+                                    "value": "PUT",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "Produk Updated",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "selling_price",
+                                    "value": "30000",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "capital_price",
+                                    "value": "25000",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "stock",
+                                    "value": "150",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "CAT001",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products/PRD001",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "PRD001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Product",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/PRD001",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "PRD001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Remove Product Image",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/PRD001/image",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "PRD001", "image"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Categories",
+            "item": [
+                {
+                    "name": "Get All Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/categories",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Category by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/categories/CAT001",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories", "CAT001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Category",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Kategori Baru\",\n  \"description\": \"Deskripsi kategori\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/categories",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Category",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Kategori Updated\",\n  \"description\": \"Deskripsi updated\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/categories/CAT001",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories", "CAT001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Category",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/categories/CAT001",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories", "CAT001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Products by Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/categories/CAT001/products",
+                            "host": ["{{base_url}}"],
+                            "path": ["categories", "CAT001", "products"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Transactions",
+            "item": [
+                {
+                    "name": "Get All Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/transactions?page=1&per_page=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Transaction by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/transactions/TRX001",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions", "TRX001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Transaction",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"shift_id\": \"SF000001\",\n  \"payment_method\": \"cash\",\n  \"items\": [\n    {\n      \"product_id\": \"PRD001\",\n      \"quantity\": 2,\n      \"price\": 25000\n    },\n    {\n      \"product_id\": \"PRD002\",\n      \"quantity\": 1,\n      \"price\": 50000\n    }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/transactions",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Transaction",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"payment_method\": \"transfer\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/transactions/TRX001",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions", "TRX001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Transaction",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/transactions/TRX001",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions", "TRX001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Transactions Excel",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/transactions/export/excel?start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions", "export", "excel"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Transactions PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/transactions/export/pdf?start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["transactions", "export", "pdf"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Cashflow",
+            "item": [
+                {
+                    "name": "Get All Cashflows",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflows?page=1&per_page=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cashflow by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflows/CF001",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows", "CF001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Cashflow (Income)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2025-01-15\",\n  \"description\": \"Penjualan tambahan\",\n  \"category\": \"income\",\n  \"type\": \"operational\",\n  \"method\": \"cash\",\n  \"amount\": 1000000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/cashflows",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Cashflow (Expense)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2025-01-15\",\n  \"description\": \"Pembelian bahan baku\",\n  \"category\": \"expense\",\n  \"type\": \"operational\",\n  \"method\": \"cash\",\n  \"amount\": 500000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/cashflows",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows"]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Cashflow",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"description\": \"Updated description\",\n  \"amount\": 600000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/cashflows/CF001",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows", "CF001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Cashflow",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflows/CF001",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflows", "CF001"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cashflow Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflow/summary?start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflow", "summary"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cashflow Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflow/categories",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflow", "categories"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cashflow Methods",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflow/methods",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflow", "methods"]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Cashflow PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflow/export/pdf?start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflow", "export", "pdf"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Cashflow Excel",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cashflow/export/excel?start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["cashflow", "export", "excel"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7. Profit",
+            "item": [
+                {
+                    "name": "Calculate Profit",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profit?start_date=2025-01-01&end_date=2025-01-31&period=monthly",
+                            "host": ["{{base_url}}"],
+                            "path": ["profit"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                },
+                                {
+                                    "key": "period",
+                                    "value": "monthly"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Yearly Profit Chart",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profit/yearly-chart?year=2025",
+                            "host": ["{{base_url}}"],
+                            "path": ["profit", "yearly-chart"],
+                            "query": [
+                                {
+                                    "key": "year",
+                                    "value": "2025"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profit Comparison",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profit/comparison?period1_start=2025-01-01&period1_end=2025-01-31&period2_start=2025-02-01&period2_end=2025-02-28",
+                            "host": ["{{base_url}}"],
+                            "path": ["profit", "comparison"],
+                            "query": [
+                                {
+                                    "key": "period1_start",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "period1_end",
+                                    "value": "2025-01-31"
+                                },
+                                {
+                                    "key": "period2_start",
+                                    "value": "2025-02-01"
+                                },
+                                {
+                                    "key": "period2_end",
+                                    "value": "2025-02-28"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Profit PDF",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profit/export/pdf?start_date=2025-01-01&end_date=2025-01-31&period=monthly",
+                            "host": ["{{base_url}}"],
+                            "path": ["profit", "export", "pdf"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                },
+                                {
+                                    "key": "period",
+                                    "value": "monthly"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Profit Excel",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profit/export/excel?start_date=2025-01-01&end_date=2025-01-31&period=monthly",
+                            "host": ["{{base_url}}"],
+                            "path": ["profit", "export", "excel"],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                },
+                                {
+                                    "key": "period",
+                                    "value": "monthly"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "8. Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/summary",
+                            "host": ["{{base_url}}"],
+                            "path": ["dashboard", "summary"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Latest Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/latest-transactions?limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["dashboard", "latest-transactions"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Top Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/top-products?limit=10&period=month",
+                            "host": ["{{base_url}}"],
+                            "path": ["dashboard", "top-products"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "period",
+                                    "value": "month"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Sales Chart",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/sales-chart?period=monthly&start_date=2025-01-01&end_date=2025-01-31",
+                            "host": ["{{base_url}}"],
+                            "path": ["dashboard", "sales-chart"],
+                            "query": [
+                                {
+                                    "key": "period",
+                                    "value": "monthly"
+                                },
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Low Stock Products",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/low-stock?threshold=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["dashboard", "low-stock"],
+                            "query": [
+                                {
+                                    "key": "threshold",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9. Shift Management",
+            "item": [
+                {
+                    "name": "Get Active Shift",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/shift/active",
+                            "host": ["{{base_url}}"],
+                            "path": ["shift", "active"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get or Create Shift",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/shift/get-or-create",
+                            "host": ["{{base_url}}"],
+                            "path": ["shift", "get-or-create"]
+                        }
+                    }
+                },
+                {
+                    "name": "Close Shift",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/shift/close",
+                            "host": ["{{base_url}}"],
+                            "path": ["shift", "close"]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000/api",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
