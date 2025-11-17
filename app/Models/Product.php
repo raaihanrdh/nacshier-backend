@@ -22,7 +22,7 @@ class Product extends Model
         'capital_price',
         'category_id',
         'stock',
-        'image_path',
+        'image_data',
     ];
 
     protected $dates = ['deleted_at'];
@@ -75,11 +75,11 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 
-    // Accessor untuk image URL
+    // Accessor untuk image URL (base64 data URL)
     public function getImageUrlAttribute()
     {
-        if ($this->image_path) {
-            return asset('storage/' . $this->image_path);
+        if ($this->image_data) {
+            return $this->image_data; // Return base64 data URL directly
         }
         return null;
     }

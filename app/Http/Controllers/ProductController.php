@@ -18,10 +18,10 @@ class ProductController extends Controller
         try {
             $products = Product::whereNull('deleted_at')->get();
             
-            // Tambahkan URL gambar jika ada
+            // Tambahkan image URL dari base64 data
             $products->each(function($product) {
-                if ($product->image_path) {
-                    $product->image_url = asset('storage/' . $product->image_path);
+                if ($product->image_data) {
+                    $product->image_url = $product->image_data; // Base64 data URL
                 }
             });
             
@@ -30,6 +30,41 @@ class ProductController extends Controller
             Log::error('Product index error: ' . $e->getMessage());
             return $this->errorResponse('Failed to retrieve products', 500);
         }
+    }
+
+    // Helper function untuk validasi dan convert base64 image
+    private function processBase64Image($base64String)
+    {
+        if (!$base64String) {
+            return null;
+        }
+
+        // Validasi format base64 data URL (data:image/...;base64,...)
+        if (!preg_match('/^data:image\/(jpeg|jpg|png|gif);base64,/', $base64String)) {
+            throw new \Exception('Invalid image format. Only JPEG, PNG, and GIF are allowed.');
+        }
+
+        // Extract base64 data
+        $imageData = explode(',', $base64String, 2)[1];
+        $decodedImage = base64_decode($imageData);
+
+        if ($decodedImage === false) {
+            throw new \Exception('Failed to decode base64 image.');
+        }
+
+        // Validasi ukuran maksimal 2MB (2097152 bytes)
+        $imageSize = strlen($decodedImage);
+        if ($imageSize > 2097152) {
+            throw new \Exception('Image size exceeds maximum limit of 2MB.');
+        }
+
+        // Validasi minimum size (optional, untuk memastikan bukan file kosong)
+        if ($imageSize < 100) {
+            throw new \Exception('Image file is too small.');
+        }
+
+        // Return base64 data URL as is (for storing in database)
+        return $base64String;
     }
 
     // Menyimpan produk baru
@@ -43,27 +78,25 @@ class ProductController extends Controller
                 'capital_price'  => 'required|numeric|min:0',
                 'category_id'    => 'required|exists:categories,category_id',
                 'stock'          => 'required|integer|min:0',
-                'image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image'          => 'nullable|string', // Base64 image data URL
             ]);
 
             // Mulai transaction
             DB::beginTransaction();
 
-            // Hapus image dari validated data, karena kita akan mengelolanya secara terpisah
+            // Proses gambar base64 jika ada
             $productData = collect($validated)->except(['image'])->toArray();
             
-            // Upload gambar jika ada
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('products', 'public');
-                $productData['image_path'] = $imagePath;
+            if ($request->has('image') && $request->input('image')) {
+                $productData['image_data'] = $this->processBase64Image($request->input('image'));
             }
 
             // Product akan menggunakan auto-generated ID dari model
             $product = Product::create($productData);
             
-            // Tambahkan URL gambar jika ada
-            if ($product->image_path) {
-                $product->image_url = asset('storage/' . $product->image_path);
+            // Tambahkan image URL dari base64 data
+            if ($product->image_data) {
+                $product->image_url = $product->image_data;
             }
 
             DB::commit();
@@ -71,18 +104,9 @@ class ProductController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-            if (isset($imagePath) && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
             return $this->validationErrorResponse($e->validator);
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Hapus file gambar jika sudah diupload tapi gagal save ke database
-            if (isset($imagePath) && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            
             Log::error('Error creating product: ' . $e->getMessage());
             return $this->errorResponse('Gagal menyimpan produk: ' . $e->getMessage(), 500);
         }
@@ -95,9 +119,9 @@ class ProductController extends Controller
             // Gunakan product_id sebagai parameter pencarian
             $product = Product::whereNull('deleted_at')->where('product_id', $id)->firstOrFail();
             
-            // Tambahkan URL gambar jika ada
-            if ($product->image_path) {
-                $product->image_url = asset('storage/' . $product->image_path);
+            // Tambahkan image URL dari base64 data
+            if ($product->image_data) {
+                $product->image_url = $product->image_data;
             }
             
             return $this->successResponse($product, 'Product retrieved successfully');
@@ -116,18 +140,6 @@ class ProductController extends Controller
             // Gunakan product_id sebagai parameter pencarian
             $product = Product::whereNull('deleted_at')->where('product_id', $id)->firstOrFail();
         
-            // Logging request data
-            Log::info('Update Request Data:', $request->all());
-            
-            // Logging file information
-            if ($request->hasFile('image')) {
-                Log::info('Image file detected', [
-                    'name' => $request->file('image')->getClientOriginalName(),
-                    'size' => $request->file('image')->getSize(),
-                    'mime' => $request->file('image')->getMimeType()
-                ]);
-            }
-        
             $validated = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
@@ -135,7 +147,7 @@ class ProductController extends Controller
                 'capital_price' => 'sometimes|required|numeric|min:0',
                 'category_id' => 'sometimes|required|exists:categories,category_id',
                 'stock' => 'sometimes|required|integer|min:0',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => 'nullable|string', // Base64 image data URL
             ]);
 
             DB::beginTransaction();
@@ -146,33 +158,26 @@ class ProductController extends Controller
                 'category_id', 'stock'
             ]))->toArray();
             
-            $oldImagePath = null;
-            
-            if ($request->hasFile('image')) {
-                // Simpan path gambar lama untuk dihapus nanti
-                $oldImagePath = $product->image_path;
-                
-                // Store new image
-                $imagePath = $request->file('image')->store('products', 'public');
-                $productData['image_path'] = $imagePath;
-                
-                Log::info('New image stored at:', ['path' => $imagePath]);
+            // Proses gambar base64 jika ada
+            if ($request->has('image')) {
+                if ($request->input('image')) {
+                    // Update dengan gambar baru
+                    $productData['image_data'] = $this->processBase64Image($request->input('image'));
+                } else {
+                    // Hapus gambar jika image kosong/null
+                    $productData['image_data'] = null;
+                }
             }
         
             // Update produk tanpa mengubah product_id
             $product->update($productData);
             
-            // Hapus gambar lama setelah update berhasil
-            if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
-                Storage::disk('public')->delete($oldImagePath);
-            }
-            
             // Refresh model untuk mendapatkan data terbaru
             $product->fresh();
             
-            // Tambahkan URL gambar
-            if ($product->image_path) {
-                $product->image_url = asset('storage/' . $product->image_path);
+            // Tambahkan image URL dari base64 data
+            if ($product->image_data) {
+                $product->image_url = $product->image_data;
             }
 
             DB::commit();
@@ -183,18 +188,9 @@ class ProductController extends Controller
             return $this->notFoundResponse('Product not found');
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
-            if (isset($imagePath) && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
             return $this->validationErrorResponse($e->validator);
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            // Hapus file gambar baru jika sudah diupload tapi gagal update
-            if (isset($imagePath) && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            
             Log::error('Error updating product: ' . $e->getMessage());
             return $this->errorResponse('Gagal mengupdate produk: ' . $e->getMessage(), 500);
         }
@@ -225,7 +221,7 @@ class ProductController extends Controller
             $product = Product::whereNull('deleted_at')->where('product_id', $id)->firstOrFail();
             
             // Pastikan produk memiliki gambar
-            if (!$product->image_path) {
+            if (!$product->image_data) {
                 return response()->json([
                     'message' => 'Product has no image to remove.'
                 ], 400);
@@ -233,16 +229,9 @@ class ProductController extends Controller
             
             DB::beginTransaction();
             
-            $oldImagePath = $product->image_path;
-            
-            // Update product record
-            $product->image_path = null;
+            // Update product record - hapus image_data
+            $product->image_data = null;
             $product->save();
-            
-            // Hapus file dari storage setelah update berhasil
-            if (Storage::disk('public')->exists($oldImagePath)) {
-                Storage::disk('public')->delete($oldImagePath);
-            }
             
             DB::commit();
             

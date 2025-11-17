@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('capital_price')->nullable();
             $table->integer('selling_price');
             $table->integer('stock')->default(0);
-            $table->string('image_path', 255)->nullable();
+            $table->text('image_data')->nullable(); // Base64 image data
             $table->timestamps();
             $table->softDeletes();
 
