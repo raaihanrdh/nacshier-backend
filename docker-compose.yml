@@ -18,25 +18,25 @@ services:
       - db
       - redis
 
-  # Nginx Service (removed - not needed for production)
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: nacshier-nginx
-  #   restart: unless-stopped
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./:/var/www/html
-  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-  #     - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-  #     - ./docker/nginx/ssl:/etc/nginx/ssl
-  #     - certbot-etc:/etc/letsencrypt
-  #     - certbot-var:/var/lib/letsencrypt
-  #   networks:
-  #     - nacshier-network
-  #   depends_on:
-  #     - app
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: nacshier-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    networks:
+      - nacshier-network
+    depends_on:
+      - app
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   # MySQL Database
   db:
@@ -67,15 +67,14 @@ services:
     networks:
       - nacshier-network
 
-  # Certbot for SSL (run manually when needed)
-  # certbot:
-  #   image: certbot/certbot
-  #   container_name: nacshier-certbot
-  #   volumes:
-  #     - certbot-etc:/etc/letsencrypt
-  #     - certbot-var:/var/lib/letsencrypt
-  #     - ./public:/var/www/html/public
-  #   command: certonly --webroot --webroot-path=/var/www/html/public --email admin@nacshier.my.id --agree-tos --no-eff-email -d api.nacshier.my.id
+  # Certbot for SSL
+  certbot:
+    image: certbot/certbot
+    container_name: nacshier-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
   nacshier-network:
@@ -88,6 +87,6 @@ volumes:
     driver: local
   certbot-etc:
     driver: local
-  certbot-var:
+  certbot-www:
     driver: local
 
