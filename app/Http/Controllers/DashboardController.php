@@ -10,34 +10,62 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-public function summary()
+public function summary(Request $request)
 {
         try {
+    $period = $request->input('period', 'daily'); // daily, weekly, monthly
     $today = Carbon::today();
+    
+    $baseQuery = Transaction::query();
+
+    // Filter berdasarkan periode
+    if ($period === 'daily') {
+        $startOfDay = $today->copy()->startOfDay();
+        $endOfDay = $today->copy()->endOfDay();
+        $baseQuery->whereBetween('transaction_time', [$startOfDay, $endOfDay]);
+    } else if ($period === 'weekly') {
+        $startOfWeek = $today->copy()->startOfWeek();
+        $endOfWeek = $today->copy()->endOfWeek();
+        $baseQuery->whereBetween('transaction_time', [$startOfWeek, $endOfWeek]);
+    } else if ($period === 'monthly') {
+        $month = Carbon::now()->month;
+        $year = Carbon::now()->year;
+        $baseQuery->whereYear('transaction_time', $year)
+                  ->whereMonth('transaction_time', $month);
+    }
+
+    // Calculate income based on period
+    $income = $baseQuery->sum('total_amount') ?? 0;
+
+    // For total transactions and items sold, we use period-based query if period is set
+    $transactionIds = $baseQuery->pluck('transaction_id');
+    $totalTransactions = count($transactionIds);
+    $totalItemsSold = TransactionItem::whereIn('transaction_id', $transactionIds)
+                                     ->sum('quantity') ?? 0;
+
+    // Always return daily_income and monthly_income for backward compatibility
     $startOfDay = $today->copy()->startOfDay();
     $endOfDay = $today->copy()->endOfDay();
     $month = Carbon::now()->month;
     $year = Carbon::now()->year;
+    
+    $dailyIncome = Transaction::whereBetween('transaction_time', [$startOfDay, $endOfDay])
+                ->sum('total_amount') ?? 0;
+    $monthlyIncome = Transaction::whereYear('transaction_time', $year)
+                ->whereMonth('transaction_time', $month)
+                ->sum('total_amount') ?? 0;
 
     // Debug logging
     Log::debug('Dashboard summary calculation', [
-        'date_range' => [
-            'daily' => [$startOfDay, $endOfDay],
-            'monthly' => ['month' => $month, 'year' => $year]
-        ]
+        'period' => $period,
+        'income' => $income,
+        'total_transactions' => $totalTransactions,
+        'total_items_sold' => $totalItemsSold
     ]);
 
-            $dailyIncome = Transaction::whereBetween('transaction_time', [$startOfDay, $endOfDay])
-                ->sum('total_amount') ?? 0;
-            $monthlyIncome = Transaction::whereYear('transaction_time', $year)
-                ->whereMonth('transaction_time', $month)
-                ->sum('total_amount') ?? 0;
-            $totalTransactions = Transaction::count() ?? 0;
-            $totalItemsSold = TransactionItem::sum('quantity') ?? 0;
-
     return response()->json([
-                'daily_income' => (float) $dailyIncome,
-                'monthly_income' => (float) $monthlyIncome,
+                'daily_income' => (float) ($period === 'daily' ? $income : $dailyIncome),
+                'monthly_income' => (float) ($period === 'monthly' ? $income : $monthlyIncome),
                 'total_transactions' => (int) $totalTransactions,
                 'total_items_sold' => (int) $totalItemsSold,
             ]);

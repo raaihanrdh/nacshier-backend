@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Transaksi</title>
+    <title>Laporan Transaksi - NaCshier</title>
     <style>
         * {
             margin: 0;
@@ -11,96 +11,122 @@
         }
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10px;
-            color: #1f2937;
+            font-size: 9pt;
+            color: #000000;
             line-height: 1.4;
+            background: #ffffff;
         }
+        
+        /* Header Formal */
         .header {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            color: white;
-            padding: 25px 20px;
+            border-bottom: 3px solid #000000;
+            padding: 15px 0;
             margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
+            margin: 0;
+            font-size: 16pt;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #000000;
+            text-align: center;
         }
-        .header-info {
-            margin-top: 12px;
-            font-size: 10px;
-            opacity: 0.95;
-            line-height: 1.8;
+        .company-name {
+            font-size: 12pt;
+            text-align: center;
+            margin-top: 5px;
+            color: #333333;
         }
-        .header-info div {
+        .report-info {
+            margin-top: 20px;
+            padding: 10px 0;
+            border-top: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+            font-size: 8pt;
+            color: #333333;
+        }
+        .report-info-row {
+            display: table;
+            width: 100%;
             margin: 3px 0;
         }
-        .summary {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            padding: 20px;
+        .report-info-label {
+            display: table-cell;
+            width: 140px;
+            font-weight: bold;
+            color: #000000;
+        }
+        .report-info-value {
+            display: table-cell;
+            color: #333333;
+        }
+        
+        /* Summary Formal */
+        .summary-section {
             margin-bottom: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2563eb;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #000000;
+            padding: 12px;
+            background: #f9f9f9;
         }
         .summary-title {
-            font-size: 14px;
+            font-size: 11pt;
             font-weight: bold;
-            color: #1e40af;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: #000000;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 5px;
         }
         .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            display: table;
+            width: 100%;
         }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 12px;
-            background: white;
-            border-radius: 6px;
-            border-left: 3px solid #2563eb;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        .summary-row {
+            display: table-row;
+        }
+        .summary-cell {
+            display: table-cell;
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e5e5;
+            width: 50%;
+        }
+        .summary-row:last-child .summary-cell {
+            border-bottom: none;
         }
         .summary-label {
             font-weight: 600;
-            color: #4b5563;
-            font-size: 10px;
+            color: #333333;
         }
         .summary-value {
+            text-align: right;
             font-weight: bold;
-            color: #1e40af;
-            font-size: 11px;
+            color: #000000;
         }
         .summary-value.positive {
-            color: #059669;
+            color: #006600;
         }
+        
+        /* Table Formal */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            margin-bottom: 20px;
             background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border-radius: 6px;
-            overflow: hidden;
+            border: 2px solid #000000;
         }
         th {
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+            background: #000000;
             color: white;
-            padding: 12px 10px;
+            padding: 8px 6px;
             text-align: left;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 8pt;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border: none;
+            border: 1px solid #000000;
         }
         th.text-right {
             text-align: right;
@@ -109,16 +135,13 @@
             text-align: center;
         }
         td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 9px;
-            color: #374151;
+            padding: 6px;
+            border: 1px solid #000000;
+            font-size: 8pt;
+            color: #000000;
         }
         tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-        tr:hover {
-            background-color: #f3f4f6;
+            background-color: #f9f9f9;
         }
         .text-right {
             text-align: right;
@@ -126,69 +149,100 @@
         .text-center {
             text-align: center;
         }
+        .positive {
+            color: #006600;
+            font-weight: bold;
+        }
+        
+        /* Footer Formal */
         .footer {
             margin-top: 30px;
             padding-top: 15px;
+            border-top: 2px solid #000000;
             text-align: center;
-            font-size: 9px;
-            color: #6b7280;
-            border-top: 2px solid #e5e7eb;
+            font-size: 7pt;
+            color: #666666;
         }
-        .footer-logo {
+        .footer-company {
             font-weight: bold;
-            color: #2563eb;
+            color: #000000;
             margin-bottom: 5px;
         }
+        .footer-info {
+            margin-top: 3px;
+            color: #666666;
+        }
+        
+        /* No Data */
         .no-data {
             text-align: center;
             padding: 40px;
-            color: #9ca3af;
+            border: 1px solid #cccccc;
+            background: #f9f9f9;
+            margin: 20px 0;
             font-style: italic;
+            color: #666666;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📊 LAPORAN TRANSAKSI</h1>
-        <div class="header-info">
-            <div><strong>Periode:</strong> {{ ucfirst($period) }}</div>
-            <div><strong>Tanggal:</strong> {{ $date_range }}</div>
-            @if(!empty($filters['product']) || !empty($filters['cashier']))
-                <div><strong>Filter:</strong> 
-                    @if(!empty($filters['product'])) Produk: {{ $filters['product'] }} @endif
-                    @if(!empty($filters['cashier'])) Kasir: {{ $filters['cashier'] }} @endif
+        <h1>LAPORAN TRANSAKSI</h1>
+        <div class="company-name">NaCshier - Point of Sale System</div>
+        <div class="report-info">
+            <div class="report-info-row">
+                <span class="report-info-label">Periode Laporan:</span>
+                <span class="report-info-value">{{ ucfirst($period) }}</span>
+            </div>
+            <div class="report-info-row">
+                <span class="report-info-label">Rentang Tanggal:</span>
+                <span class="report-info-value">{{ $date_range }}</span>
+            </div>
+            @if(!empty($filters['product']))
+                <div class="report-info-row">
+                    <span class="report-info-label">Filter Produk:</span>
+                    <span class="report-info-value">{{ $filters['product'] }}</span>
                 </div>
             @endif
-            <div><strong>Dibuat pada:</strong> {{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}</div>
+            @if(!empty($filters['cashier']))
+                <div class="report-info-row">
+                    <span class="report-info-label">Filter Kasir:</span>
+                    <span class="report-info-value">{{ $filters['cashier'] }}</span>
+                </div>
+            @endif
+            <div class="report-info-row">
+                <span class="report-info-label">Tanggal Cetak:</span>
+                <span class="report-info-value">{{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}</span>
+            </div>
         </div>
     </div>
 
-    <div class="summary">
-        <div class="summary-title">📈 Ringkasan Transaksi</div>
+    <div class="summary-section">
+        <div class="summary-title">Ringkasan Transaksi</div>
         <div class="summary-grid">
-            <div class="summary-item">
-                <span class="summary-label">Total Pendapatan:</span>
-                <span class="summary-value positive">Rp {{ number_format($summary['pendapatan'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Total Pendapatan</div>
+                <div class="summary-cell summary-value positive">Rp {{ number_format($summary['pendapatan'], 0, ',', '.') }}</div>
             </div>
-            <div class="summary-item">
-                <span class="summary-label">Income QRIS:</span>
-                <span class="summary-value positive">Rp {{ number_format($summary['incomeQRIS'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Income QRIS</div>
+                <div class="summary-cell summary-value positive">Rp {{ number_format($summary['incomeQRIS'], 0, ',', '.') }}</div>
             </div>
-            <div class="summary-item">
-                <span class="summary-label">Income Cash:</span>
-                <span class="summary-value positive">Rp {{ number_format($summary['incomeCash'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Income Cash</div>
+                <div class="summary-cell summary-value positive">Rp {{ number_format($summary['incomeCash'], 0, ',', '.') }}</div>
             </div>
-            <div class="summary-item">
-                <span class="summary-label">Income Transfer:</span>
-                <span class="summary-value positive">Rp {{ number_format($summary['incomeTransfer'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Income Transfer</div>
+                <div class="summary-cell summary-value positive">Rp {{ number_format($summary['incomeTransfer'], 0, ',', '.') }}</div>
             </div>
-            <div class="summary-item">
-                <span class="summary-label">Total Transaksi:</span>
-                <span class="summary-value">{{ number_format($summary['totalTransaksi'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Total Transaksi</div>
+                <div class="summary-cell summary-value">{{ number_format($summary['totalTransaksi'], 0, ',', '.') }}</div>
             </div>
-            <div class="summary-item">
-                <span class="summary-label">Total Barang:</span>
-                <span class="summary-value">{{ number_format($summary['totalBarang'], 0, ',', '.') }}</span>
+            <div class="summary-row">
+                <div class="summary-cell summary-label">Total Barang</div>
+                <div class="summary-cell summary-value">{{ number_format($summary['totalBarang'], 0, ',', '.') }}</div>
             </div>
         </div>
     </div>
@@ -197,14 +251,14 @@
     <table>
         <thead>
             <tr>
-                <th class="text-center">No</th>
-                <th>ID Transaksi</th>
-                <th>Tanggal</th>
-                <th>Waktu</th>
+                <th class="text-center" style="width: 30px;">No</th>
+                <th style="width: 120px;">ID Transaksi</th>
+                <th style="width: 90px;">Tanggal</th>
+                <th style="width: 70px;">Waktu</th>
                 <th>Kasir</th>
-                <th>Metode Pembayaran</th>
-                <th class="text-right">Total (Rp)</th>
-                <th class="text-center">Jumlah Item</th>
+                <th style="width: 100px;">Metode Pembayaran</th>
+                <th class="text-right" style="width: 120px;">Total (Rp)</th>
+                <th class="text-center" style="width: 80px;">Jumlah Item</th>
             </tr>
         </thead>
         <tbody>
@@ -216,7 +270,7 @@
                 <td>{{ $transaction['jam'] }}</td>
                 <td>{{ $transaction['kasir'] }}</td>
                 <td>{{ $transaction['metodePembayaran'] }}</td>
-                <td class="text-right"><strong>Rp {{ number_format($transaction['total'], 0, ',', '.') }}</strong></td>
+                <td class="text-right positive"><strong>Rp {{ number_format($transaction['total'], 0, ',', '.') }}</strong></td>
                 <td class="text-center">{{ $transaction['item_count'] }}</td>
             </tr>
             @endforeach
@@ -229,9 +283,9 @@
     @endif
 
     <div class="footer">
-        <div class="footer-logo">NaCshier - Point of Sale System</div>
-        <div>Laporan ini dibuat secara otomatis oleh sistem</div>
-        <div>Halaman 1</div>
+        <div class="footer-company">NaCshier - Point of Sale System</div>
+        <div class="footer-info">Laporan ini dibuat secara otomatis oleh sistem</div>
+        <div class="footer-info" style="margin-top: 5px;">Halaman 1 | {{ \Carbon\Carbon::now()->format('d F Y H:i:s') }}</div>
     </div>
 </body>
 </html>

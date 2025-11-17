@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # PHP-FPM Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nacshier-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - nacshier-network
+    depends_on:
+      - db
+      - redis
+
+  # Nginx Service (removed - not needed for production)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: nacshier-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./:/var/www/html
+  #     - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+  #     - ./docker/nginx/ssl:/etc/nginx/ssl
+  #     - certbot-etc:/etc/letsencrypt
+  #     - certbot-var:/var/lib/letsencrypt
+  #   networks:
+  #     - nacshier-network
+  #   depends_on:
+  #     - app
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: nacshier-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: nacshier_db
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_USER: ${DB_USERNAME:-nacshier_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nacshier_password}
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - nacshier-network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: nacshier-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - nacshier-network
+
+  # Certbot for SSL (run manually when needed)
+  # certbot:
+  #   image: certbot/certbot
+  #   container_name: nacshier-certbot
+  #   volumes:
+  #     - certbot-etc:/etc/letsencrypt
+  #     - certbot-var:/var/lib/letsencrypt
+  #     - ./public:/var/www/html/public
+  #   command: certonly --webroot --webroot-path=/var/www/html/public --email admin@nacshier.my.id --agree-tos --no-eff-email -d api.nacshier.my.id
+
+networks:
+  nacshier-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
+  redisdata:
+    driver: local
+  certbot-etc:
+    driver: local
+  certbot-var:
+    driver: local
+
