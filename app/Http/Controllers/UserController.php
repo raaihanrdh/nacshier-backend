@@ -31,9 +31,23 @@ class UserController extends Controller
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols()
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->messages([
+                        'password.min' => 'Password harus minimal 8 karakter.',
+                        'password.mixed' => 'Password harus mengandung huruf besar dan huruf kecil.',
+                        'password.numbers' => 'Password harus mengandung angka.',
+                        'password.symbols' => 'Password harus mengandung simbol (!@#$%^&*).',
+                    ])
             ],
             'level' => 'required|in:kasir,admin',
+        ], [
+            'password.min' => 'Password harus minimal 8 karakter.',
+            'password.mixed' => 'Password harus mengandung huruf besar dan huruf kecil.',
+            'password.numbers' => 'Password harus mengandung angka.',
+            'password.symbols' => 'Password harus mengandung simbol (!@#$%^&*).',
         ]);
 
         if ($validator->fails()) {
@@ -131,8 +145,22 @@ class UserController extends Controller
                 'password' => [
                     'required',
                     'confirmed',
-                    Password::min(8)->mixedCase()->numbers()->symbols()
+                    Password::min(8)
+                        ->mixedCase()
+                        ->numbers()
+                        ->symbols()
+                        ->messages([
+                            'password.min' => 'Password harus minimal 8 karakter.',
+                            'password.mixed' => 'Password harus mengandung huruf besar dan huruf kecil.',
+                            'password.numbers' => 'Password harus mengandung angka.',
+                            'password.symbols' => 'Password harus mengandung simbol (!@#$%^&*).',
+                        ])
                 ],
+            ], [
+                'password.min' => 'Password harus minimal 8 karakter.',
+                'password.mixed' => 'Password harus mengandung huruf besar dan huruf kecil.',
+                'password.numbers' => 'Password harus mengandung angka.',
+                'password.symbols' => 'Password harus mengandung simbol (!@#$%^&*).',
             ]);
 
             if ($validator->fails()) {

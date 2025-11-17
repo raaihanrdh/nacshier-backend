@@ -69,7 +69,18 @@ class TransactionController extends Controller
 
         try {
             $request->validate([
-                'shift_id' => 'required|string|exists:cashier_shifts,shift_id',
+                'shift_id' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $shift = \App\Models\CashierShift::where('shift_id', $value)
+                            ->whereNull('end_time') // Hanya shift yang masih aktif
+                            ->first();
+                        if (!$shift) {
+                            $fail('Shift ID tidak valid atau shift sudah ditutup. Silakan buat shift baru.');
+                        }
+                    },
+                ],
                 'total_amount' => 'required|numeric|min:0',
                 'transaction_time' => 'sometimes|date',
                 'payment_method' => 'required|string|in:Cash,Qris,Transfer',
@@ -77,6 +88,9 @@ class TransactionController extends Controller
                 'items.*.product_id' => 'required|string|exists:products,product_id',
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.selling_price' => 'sometimes|numeric|min:0',
+            ], [
+                'shift_id.required' => 'Shift ID diperlukan.',
+                'shift_id.exists' => 'Shift ID tidak valid.',
             ]);
 
             DB::beginTransaction();
