@@ -144,33 +144,54 @@ public function summary(Request $request)
 public function lowStockProducts(Request $request)
 {
     try {
-        $threshold = $request->query('threshold', 10);
+        $threshold = (int) $request->query('threshold', 10);
         
+        // Use select() to explicitly specify columns and avoid any column issues
         $products = Product::whereNull('deleted_at')
             ->where('stock', '<=', $threshold)
-            ->orderBy('stock')
+            ->orderBy('stock', 'asc')
             ->limit(10)
-            ->get(['product_id', 'name', 'stock', 'image_data']);
+            ->select('product_id', 'name', 'stock', 'image_data')
+            ->get();
             
-            // Format response to include minimum_stock field that frontend expects
-            $formattedProducts = $products->map(function($product) use ($threshold) {
-                return [
-                    'product_id' => $product->product_id,
-                    'name' => $product->name,
-                    'stock' => (int) $product->stock,
-                    'minimum_stock' => $threshold, // Add minimum_stock field
-                    'image_data' => $product->image_data,
-                    'image_url' => $product->image_data ? $product->image_data : null, // Base64 data URL
-                ];
+        // Format response to include minimum_stock field that frontend expects
+        $formattedProducts = $products->map(function($product) use ($threshold) {
+            return [
+                'product_id' => $product->product_id ?? '',
+                'name' => $product->name ?? 'Tidak diketahui',
+                'stock' => (int) ($product->stock ?? 0),
+                'minimum_stock' => $threshold,
+                'image_data' => $product->image_data ?? null,
+                'image_url' => $product->image_data ? $product->image_data : null, // Base64 data URL
+            ];
         });
             
-            return response()->json($formattedProducts);
+        return response()->json($formattedProducts, 200);
             
+    } catch (\Illuminate\Database\QueryException $e) {
+        Log::error('Database error in lowStockProducts: ' . $e->getMessage(), [
+            'sql' => $e->getSql(),
+            'bindings' => $e->getBindings(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        // Return empty array instead of 500 to prevent frontend crash
+        return response()->json([
+            'error' => 'Database error occurred',
+            'message' => 'Failed to fetch low stock products'
+        ], 500);
     } catch (\Exception $e) {
-            Log::error('Failed to fetch low stock products: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([], 500);
+        Log::error('Failed to fetch low stock products: ' . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        // Return empty array instead of 500 to prevent frontend crash
+        return response()->json([
+            'error' => 'Unexpected error occurred',
+            'message' => 'Failed to fetch low stock products'
+        ], 500);
     }
 }
 

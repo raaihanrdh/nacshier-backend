@@ -24,7 +24,51 @@ class TransactionController extends Controller
         try {
             $query = Transaction::with(['items.product']);
         
-            if ($request->filled('start_date') && $request->filled('end_date')) {
+            // Filter berdasarkan period (daily, weekly, monthly) atau custom date range
+            if ($request->filled('period')) {
+                $period = $request->input('period');
+                
+                if ($period === 'daily' && $request->filled('date')) {
+                    $date = Carbon::parse($request->date);
+                    $query->whereBetween('transaction_time', [
+                        $date->copy()->startOfDay(),
+                        $date->copy()->endOfDay()
+                    ]);
+                } elseif ($period === 'weekly') {
+                    if ($request->filled('start_date') && $request->filled('end_date')) {
+                        $query->whereBetween('transaction_time', [
+                            Carbon::parse($request->start_date)->startOfDay(),
+                            Carbon::parse($request->end_date)->endOfDay()
+                        ]);
+                    } else {
+                        // Default: current week
+                        $query->whereBetween('transaction_time', [
+                            Carbon::now()->startOfWeek(),
+                            Carbon::now()->endOfWeek()
+                        ]);
+                    }
+                } elseif ($period === 'monthly') {
+                    if ($request->filled('start_date') && $request->filled('end_date')) {
+                        $query->whereBetween('transaction_time', [
+                            Carbon::parse($request->start_date)->startOfDay(),
+                            Carbon::parse($request->end_date)->endOfDay()
+                        ]);
+                    } else {
+                        // Default: current month
+                        $query->whereBetween('transaction_time', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth()
+                        ]);
+                    }
+                } elseif ($period === 'custom' && $request->filled('start_date') && $request->filled('end_date')) {
+                    $query->whereBetween('transaction_time', [
+                        Carbon::parse($request->start_date)->startOfDay(),
+                        Carbon::parse($request->end_date)->endOfDay()
+                    ]);
+                }
+                // If period is 'all' or not recognized, show all transactions
+            } elseif ($request->filled('start_date') && $request->filled('end_date')) {
+                // Fallback: support old way (start_date and end_date without period)
                 $query->whereBetween('transaction_time', [
                     Carbon::parse($request->start_date)->startOfDay(),
                     Carbon::parse($request->end_date)->endOfDay()
@@ -68,8 +112,40 @@ class TransactionController extends Controller
         Log::info('Transaction store request:', $request->all());
 
         try {
-            $request->validate([
-                'shift_id' => [
+            $user = $request->user();
+            $isAdmin = $user->level === 'admin';
+
+            // Validasi rules: Admin tidak perlu shift_id, Kasir wajib shift_id
+            $rules = [
+                'total_amount' => 'required|numeric|min:0',
+                'transaction_time' => 'sometimes|date',
+                'payment_method' => 'required|string|in:Cash,Qris,Transfer',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|string|exists:products,product_id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.selling_price' => 'sometimes|numeric|min:0',
+            ];
+
+            // Jika admin, shift_id optional. Jika kasir, shift_id required
+            if ($isAdmin) {
+                $rules['shift_id'] = [
+                    'nullable',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        // Jika shift_id diberikan, validasi harus valid
+                        if ($value) {
+                            $shift = \App\Models\CashierShift::where('shift_id', $value)
+                                ->whereNull('end_time')
+                                ->first();
+                            if (!$shift) {
+                                $fail('Shift ID tidak valid atau shift sudah ditutup.');
+                            }
+                        }
+                    },
+                ];
+            } else {
+                // Untuk kasir, shift_id wajib dan harus valid
+                $rules['shift_id'] = [
                     'required',
                     'string',
                     function ($attribute, $value, $fail) {
@@ -80,16 +156,11 @@ class TransactionController extends Controller
                             $fail('Shift ID tidak valid atau shift sudah ditutup. Silakan buat shift baru.');
                         }
                     },
-                ],
-                'total_amount' => 'required|numeric|min:0',
-                'transaction_time' => 'sometimes|date',
-                'payment_method' => 'required|string|in:Cash,Qris,Transfer',
-                'items' => 'required|array|min:1',
-                'items.*.product_id' => 'required|string|exists:products,product_id',
-                'items.*.quantity' => 'required|integer|min:1',
-                'items.*.selling_price' => 'sometimes|numeric|min:0',
-            ], [
-                'shift_id.required' => 'Shift ID diperlukan.',
+                ];
+            }
+
+            $request->validate($rules, [
+                'shift_id.required' => 'Shift ID diperlukan untuk kasir.',
                 'shift_id.exists' => 'Shift ID tidak valid.',
             ]);
 
@@ -100,7 +171,7 @@ class TransactionController extends Controller
                 : Carbon::now('Asia/Jakarta');
 
             $transaction = new Transaction([
-                'shift_id' => $request->shift_id,
+                'shift_id' => $request->shift_id ?? null, // Admin bisa null, Kasir wajib ada
                 'total_amount' => $request->total_amount,
                 'transaction_time' => $transactionTime,
                 'payment_method' => $request->payment_method,

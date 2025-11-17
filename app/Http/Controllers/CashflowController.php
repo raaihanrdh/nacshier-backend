@@ -16,29 +16,101 @@ class CashflowController extends Controller
     {
         $query = Cashflow::query();
         
+        // Filter berdasarkan period (daily, weekly, monthly, custom, all)
+        if ($request->filled('period')) {
+            $period = $request->input('period');
+            
+            if ($period === 'daily' && $request->filled('date')) {
+                $date = Carbon::parse($request->date);
+                $query->whereBetween('date', [
+                    $date->copy()->startOfDay()->format('Y-m-d'),
+                    $date->copy()->endOfDay()->format('Y-m-d')
+                ]);
+            } elseif ($period === 'weekly') {
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $query->whereBetween('date', [
+                        Carbon::parse($request->start_date)->format('Y-m-d'),
+                        Carbon::parse($request->end_date)->format('Y-m-d')
+                    ]);
+                } else {
+                    // Default: current week
+                    $query->whereBetween('date', [
+                        Carbon::now()->startOfWeek()->format('Y-m-d'),
+                        Carbon::now()->endOfWeek()->format('Y-m-d')
+                    ]);
+                }
+            } elseif ($period === 'monthly') {
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $query->whereBetween('date', [
+                        Carbon::parse($request->start_date)->format('Y-m-d'),
+                        Carbon::parse($request->end_date)->format('Y-m-d')
+                    ]);
+                } else {
+                    // Default: current month
+                    $query->whereBetween('date', [
+                        Carbon::now()->startOfMonth()->format('Y-m-d'),
+                        Carbon::now()->endOfMonth()->format('Y-m-d')
+                    ]);
+                }
+            } elseif ($period === 'custom' && $request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereBetween('date', [
+                    Carbon::parse($request->start_date)->format('Y-m-d'),
+                    Carbon::parse($request->end_date)->format('Y-m-d')
+                ]);
+            }
+            // If period is 'all' or not recognized, show all cashflows
+        } elseif ($request->has('start_date') && $request->has('end_date')) {
+            // Fallback: support old way (start_date and end_date without period)
+            $query->whereBetween('date', [
+                Carbon::parse($request->start_date)->format('Y-m-d'),
+                Carbon::parse($request->end_date)->format('Y-m-d')
+            ]);
+        } elseif ($request->has('start_date')) {
+            $query->where('date', '>=', Carbon::parse($request->start_date)->format('Y-m-d'));
+        } elseif ($request->has('end_date')) {
+            $query->where('date', '<=', Carbon::parse($request->end_date)->format('Y-m-d'));
+        }
+        
         // Filter berdasarkan tipe jika ada
-        if ($request->has('type')) {
+        if ($request->has('type') && $request->type !== '') {
             $query->where('type', $request->type);
         }
         
-        // Filter berdasarkan range tanggal
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('date', [$request->start_date, $request->end_date]);
-        } elseif ($request->has('start_date')) {
-            $query->where('date', '>=', $request->start_date);
-        } elseif ($request->has('end_date')) {
-            $query->where('date', '<=', $request->end_date);
-        }
-        
         // Filter berdasarkan kategori
-        if ($request->has('category')) {
+        if ($request->has('category') && $request->category !== '') {
             $query->where('category', $request->category);
         }
         
-        // Sort berdasarkan tanggal terbaru
-        $cashflows = $query->orderBy('date', 'desc')->get();
+        // Filter berdasarkan method
+        if ($request->has('method') && $request->method !== '') {
+            $query->where('method', $request->method);
+        }
         
-        return $this->successResponse($cashflows, 'Cashflows retrieved successfully');
+        // Filter berdasarkan search (description)
+        if ($request->has('search') && $request->search !== '') {
+            $query->where('description', 'like', '%' . $request->search . '%');
+        }
+        
+        // Pagination
+        $perPage = $request->input('per_page', 25);
+        $page = $request->input('page', 1);
+        
+        // Sort berdasarkan tanggal terbaru
+        $cashflows = $query->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $cashflows->items(),
+            'meta' => [
+                'current_page' => $cashflows->currentPage(),
+                'last_page' => $cashflows->lastPage(),
+                'per_page' => $cashflows->perPage(),
+                'total' => $cashflows->total(),
+            ],
+            'message' => 'Cashflows retrieved successfully'
+        ]);
     }
     
     public function store(Request $request)
