@@ -150,7 +150,7 @@ public function lowStockProducts(Request $request)
             ->where('stock', '<=', $threshold)
             ->orderBy('stock')
             ->limit(10)
-            ->get(['product_id', 'name', 'stock', 'image_path']);
+            ->get(['product_id', 'name', 'stock', 'image_data']);
             
             // Format response to include minimum_stock field that frontend expects
             $formattedProducts = $products->map(function($product) use ($threshold) {
@@ -159,8 +159,8 @@ public function lowStockProducts(Request $request)
                     'name' => $product->name,
                     'stock' => (int) $product->stock,
                     'minimum_stock' => $threshold, // Add minimum_stock field
-                    'image_path' => $product->image_path,
-                    'image_url' => $product->image_path ? asset('storage/' . $product->image_path) : null,
+                    'image_data' => $product->image_data,
+                    'image_url' => $product->image_data ? $product->image_data : null, // Base64 data URL
                 ];
         });
             
