@@ -45,9 +45,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: nacshier_db
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_USER: ${DB_USERNAME:-nacshier_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-nacshier_password}
+      MYSQL_ROOT_PASSWORD: root123
     volumes:
       - dbdata:/var/lib/mysql
     ports:
